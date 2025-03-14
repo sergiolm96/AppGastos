@@ -1,0 +1,33 @@
+# Archivos y carpetas de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.egg-info/
+build/
+dist/
+env/
+venv/
+ENV/
+.Python
+
+# Archivos de configuración local y variables de entorno
+.env
+
+# Archivos y carpetas de VS Code
+.vscode/
+
+# Módulos y logs de Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+
+# Archivos de compilación de TypeScript
+*.tsbuildinfo
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
