@@ -11,9 +11,9 @@ def create_user(data):
     try:
         valid_data = UserSchema(**data) 
 
-        if Usuario.query.filter_by(Usuario.nombre_usuario == valid_data.nombre_usuario).first():
+        if Usuario.query.filter(Usuario.nombre_usuario == valid_data.nombre_usuario).first():
             return {"error": "El nombre de usuario no está disponible"}
-        if Usuario.query.filter_by(Usuario.email == valid_data.email).first():
+        if Usuario.query.filter(Usuario.email == valid_data.email).first():
             return {"error": "El email ya está en uso"}
         
         new_user = Usuario(
