@@ -3,6 +3,10 @@ from models.expense import Gasto
 from database import db
 
 def create_expense(data):
+    """
+    Recibe un diccionario con los datos del gasto: concepto, cantidad y categoria del gasto.
+    Valida y crea un nuevo gasto en la base de datos.    
+    """
     try:
         valid_data = ExpenseSchema(**data)  # Valida los datos con Pydantic
         new_expense = Gasto(
