@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify, render_template
 from models.expense import Gasto  
-from database import db  
+from config import db  
 from datetime import datetime
+from flask_login import login_required
 
 
 expense_bp = Blueprint("expenses", __name__)
 
 @expense_bp.route("/gasto/nuevo", methods=["GET", "POST"])
+@login_required
 def add_expense():
     if request.method == "GET":
         return render_template("new_expense.html")

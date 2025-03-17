@@ -1,6 +1,6 @@
 from models.expense_schema import ExpenseSchema
 from models.expense import Gasto
-from database import db
+from config import db
 
 def create_expense(data):
     """
