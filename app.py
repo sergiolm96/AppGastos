@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from database import db
 from routes.expenses_routes import expense_bp
+from routes.auth_routes import auth_bp
 
 app = Flask(__name__)
 
@@ -13,8 +14,7 @@ db.init_app(app)
 
 # Registrar los Blueprints (rutas separadas)
 app.register_blueprint(expense_bp, url_prefix="/api")
-
-from models.expense import Gasto
+app.register_blueprint(auth_bp)
 
 # Crear las tablas si no existen
 with app.app_context():

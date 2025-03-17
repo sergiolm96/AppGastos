@@ -18,6 +18,10 @@ ENV/
 # Archivos y carpetas de VS Code
 .vscode/
 
+# Archivos y carpetas de Base de datos
+*.sqlite3
+*.db
+
 # Módulos y logs de Node.js
 node_modules/
 npm-debug.log*
