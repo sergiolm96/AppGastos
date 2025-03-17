@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Tus Gastos</h1>
+
+<div class="chart-container">
+    {% if gastos %}
+        <!-- Usamos data-attribute para pasar los datos a TypeScript -->
+        <canvas id="grafico-gastos" data-gastos="{{ gastos|tojson }}"></canvas>
+    {% else %}
+        <p>No hay gastos registrados para mostrar.</p>
+    {% endif %}
+</div>
+
+<div class="expenses-list">
+    {% if gastos %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in gastos %}
+                <tr>
+                    <td>{{ gasto.fecha }}</td>
+                    <td>{{ gasto.descripcion }}</td>
+                    <td>{{ gasto.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+<!-- Incluir Chart.js antes de tu script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Incluir el script compilado de TypeScript -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

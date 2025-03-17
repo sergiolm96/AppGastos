@@ -7,9 +7,10 @@
 </head>
 <body>
     <h1>Lista de Gastos</h1>
-    <a href="{{ url_for('auth.login_user') }}">Iniciar Sesión</a>
+    <a href="{{ url_for('auth.login') }}">Iniciar Sesión</a>
     <a href="{{ url_for('auth.register_user') }}">Registrarme</a>
     <a href="{{ url_for('expenses.add_expense') }}">Agregar Gasto</a>
+    <li><a href="{{ url_for('expense.ver_gastos') }}">Ver Gastos</a></li>
     <ul>
         {% for expense in expenses %}
             <li>{{ expense.category }} - ${{ expense.amount }} - <a href="{{ url_for('expenses.edit_expense', id=expense.id) }}">Editar</a> | 

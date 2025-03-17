@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, flash, render_template, redirect, url_for
 from models.expense import Gasto  
 from config import db  
 from datetime import datetime
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 
 expense_bp = Blueprint("expenses", __name__)
@@ -20,18 +20,48 @@ def add_expense():
         concepto = request.form.get('concepto')
   
         if not categoria_id or not cantidad:
-            return jsonify({"error": "Faltan datos requeridos"}), 400
-        
-        # Crea una nueva instancia de Gasto
+            flash("Todos los campos son requeridos", "danger")
+            return redirect(url_for('nuevo_gasto'))
+
         nuevo_gasto = Gasto(
             fecha=datetime.now().strftime('%d-%m-%Y'),
             concepto=concepto,
             cantidad=float(cantidad),
-            categoria_id=categoria_id
+            categoria_id=categoria_id,
+            usuario_id=current_user.id
         )
         
-        # Guarda el nuevo gasto en la base de datos
         db.session.add(nuevo_gasto)
         db.session.commit()
         
-        return jsonify({"message": "Gasto registrado correctamente"}), 201
+        flash("Gasto registrado correctamente", "success")
+        return redirect(url_for('index'))
+
+@expense_bp.route('/gastos', methods=['GET'])
+@login_required
+def see_expenses():
+    
+    inicio = request.args.get('inicio', None)
+    fin = request.args.get('fin', None)
+
+    query = Gasto.query.filter_by(usuario_id=current_user.id)
+
+    if inicio:
+        inicio = datetime.strptime(inicio, '%Y-%m-%d')
+        query = query.filter(Gasto.fecha >= inicio)
+    if fin:
+        fin = datetime.strptime(fin, '%Y-%m-%d')
+        query = query.filter(Gasto.fecha <= fin)
+
+    gastos = query.all()
+
+    gastos_serializados = [
+        {
+            'fecha': gasto.fecha,
+            'descripcion': gasto.concepto,
+            'cantidad': float(gasto.cantidad)
+        }
+        for gasto in gastos
+    ]
+
+    return render_template('see_expenses.html', gastos=gastos_serializados)
