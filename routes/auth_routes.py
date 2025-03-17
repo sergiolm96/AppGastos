@@ -22,12 +22,12 @@ def register_user():
             return redirect(url_for('auth.register_user'))
         
         flash("Usuario registrado correctamente. Ahora puedes iniciar sesión.", "success")
-        return redirect(url_for('auth.login_user'))
+        return redirect(url_for('auth.login'))
 
     
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
-def login_user():
+def login():
     if request.method == 'GET':
         return render_template('login.html')  
     
@@ -38,7 +38,7 @@ def login_user():
 
         if not usuario or not password:
             flash("Faltan credenciales", "danger")
-            return redirect(url_for('auth.login_user'))
+            return redirect(url_for('auth.login'))
 
         user = Usuario.query.filter_by(usuario=usuario).first()
         if user and user.check_password(password):
@@ -57,4 +57,4 @@ def login_user():
 def logout():
     logout_user()
     flash('Sesión cerrada', 'success')
-    return redirect(url_for('auth.login_user'))
+    return redirect(url_for('auth.login'))
