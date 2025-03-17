@@ -1,6 +1,7 @@
 from models.user import Usuario
 from models.user_schema import UserSchema
-from database import db
+from config import db
+from sqlalchemy.exc import IntegrityError
 
 
 def create_user(data):
@@ -11,19 +12,22 @@ def create_user(data):
     try:
         valid_data = UserSchema(**data) 
 
-        if Usuario.query.filter(Usuario.nombre_usuario == valid_data.nombre_usuario).first():
+        if Usuario.query.filter(Usuario.usuario == valid_data.usuario).first():
             return {"error": "El nombre de usuario no está disponible"}
         if Usuario.query.filter(Usuario.email == valid_data.email).first():
             return {"error": "El email ya está en uso"}
         
         new_user = Usuario(
-            nombre_usuario=valid_data.nombre_usuario,
+            usuario=valid_data.usuario,
             email=valid_data.email,
-            password=valid_data.password
+            password=valid_data.password # NO ENCRIPTAR AQUI, LO HACE EL MODELO
         )
         db.session.add(new_user)
         db.session.commit()
-        return new_user
+        return {"message": "Usuario registrado exitosamente"}
         
+    except IntegrityError:
+        db.session.rollback()  # Importante para evitar bloqueos en la BD
+        return {"error": "Este usuario o email ya están en uso"}
     except Exception as e:
         return {"error": str(e)}
