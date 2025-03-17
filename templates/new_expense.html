@@ -7,13 +7,15 @@
 </head>
 <body>
     <h1>Agregar Nuevo Gasto</h1>
-    <form method="POST">
+    <form action="/api/gasto/nuevo" method="POST">
         <label>Categoría:</label>
-        <input type="text" name="category" required>
-        <label>Monto:</label>
-        <input type="number" step="0.01" name="amount" required>
-        <label>Descripción:</label>
-        <input type="text" name="description">
+        <input type="text" name="categoria_id" required>
+        <label>Cantidad:</label>
+        <input type="number" step="0.01" name="cantidad" required>
+        <label>Concepto:</label>
+        <input type="text" name="concepto">
         <button type="submit">Guardar</button>
+    </form>
+    <a href="/gastos">Volver a Lista de gastos</a>
 </body>
 </html>
