@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>Lista de Gastos</h1>
+    <a href="{{ url_for('auth.login_user') }}">Iniciar Sesión</a>
     <a href="{{ url_for('auth.register_user') }}">Registrarme</a>
     <a href="{{ url_for('expenses.add_expense') }}">Agregar Gasto</a>
     <ul>
