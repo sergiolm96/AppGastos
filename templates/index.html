@@ -7,11 +7,11 @@
 </head>
 <body>
     <h1>Lista de Gastos</h1>
-    <a href="{{ url_for('new_expense') }}">Agregar Gasto</a>
+    <a href="{{ url_for('expenses.add_expense') }}">Agregar Gasto</a>
     <ul>
         {% for expense in expenses %}
-            <li>{{ expense.category }} - ${{ expense.amount }} - <a href="{{ url_for('edit_expense', id=expense.id) }}">Editar</a> | 
-            <form action="{{ url_for('delete_expense', id=expense.id) }}" method="post" style="display:inline;">
+            <li>{{ expense.category }} - ${{ expense.amount }} - <a href="{{ url_for('expenses.edit_expense', id=expense.id) }}">Editar</a> | 
+            <form action="{{ url_for('expenses.delete_expense', id=expense.id) }}" method="post" style="display:inline;">
                 <button type="submit">Eliminar</button>
             </form></li>
         {% endfor %}
