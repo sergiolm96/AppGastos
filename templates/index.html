@@ -1,24 +1,32 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Gastos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <h1>Lista de Gastos</h1>
-    <a href="{{ url_for('auth.login') }}">Iniciar Sesión</a>
-    <a href="{{ url_for('auth.register_user') }}">Registrarme</a>
-    <a href="{{ url_for('expenses.add_expense') }}">Agregar Gasto</a>
-    <li><a href="{{ url_for('expense.ver_gast') }}">Ver Gastos</a></li>
-    <ul>
+{% extends "base.html" %}
+{% block content %}
+<h1>Lista de Gastos</h1>
+
+{% if not current_user.is_authenticated %}
+    <div class="auth-buttons">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Iniciar Sesión</a>
+        <a href="{{ url_for('auth.register_user') }}" class="btn btn-secondary">Registrarme</a>
+    </div>
+{% else %}
+    <div class="action-buttons">
+        <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">Agregar Gasto</a>
+        <a href="{{ url_for('expenses.see_expenses') }}" class="btn btn-info">Ver Gastos</a>
+    </div>
+
+    {% if expenses %}
+    <ul class="expenses-list">
         {% for expense in expenses %}
-            <li>{{ expense.category }} - ${{ expense.amount }} - <a href="{{ url_for('expenses.edit_expense', id=expense.id) }}">Editar</a> | 
-            <form action="{{ url_for('expenses.delete_expense', id=expense.id) }}" method="post" style="display:inline;">
-                <button type="submit">Eliminar</button>
-            </form></li>
+            <li>
+                {{ expense.category }} - ${{ expense.amount }} - 
+                <a href="{{ url_for('expenses.edit_expense', id=expense.id) }}">Editar</a> | 
+                <form action="{{ url_for('expenses.delete_expense', id=expense.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
+            </li>
         {% endfor %}
     </ul>
-</body>
-</html>
+    {% else %}
+        <p>No hay gastos registrados.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

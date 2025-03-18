@@ -1,12 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>Registrarse</title>
-</head>
-<body>
+{% extends "base.html" %}
+    {% block content %}
     <h2>Registro de Usuario</h2>
     <form method="POST">
         <label for="usuario">Usuario:</label>
@@ -20,8 +13,6 @@
         
         <button type="submit">Registrarse</button>
     </form>
-
     <p>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión aquí</a></p>
-</body>
-</html>
-
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Ir a inicio</a>
+    {% endblock %}

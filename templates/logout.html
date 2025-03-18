@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h1>Has cerrado sesión exitosamente</h1>
+        <p>Tu sesión ha sido cerrada. Vuelve a iniciar sesión cuando lo desees.</p>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Iniciar sesión</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Ir a inicio</a>
+    </div>
+{% endblock %}
