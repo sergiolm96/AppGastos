@@ -30,7 +30,7 @@ def add_expense():
             concepto=concepto,
             cantidad=float(cantidad),
             categoria=categoria,
-            usuario_id=current_user.id
+            usuario_email=current_user.email
         )
         
         db.session.add(nuevo_gasto)
@@ -46,7 +46,7 @@ def see_expenses():
     inicio = request.args.get('inicio', None)
     fin = request.args.get('fin', None)
 
-    query = Gasto.query.filter_by(usuario_id=current_user.id)
+    query = Gasto.query.filter_by(usuario_email=current_user.email)
 
     if inicio:
         inicio = datetime.strptime(inicio, '%Y-%m-%d')
