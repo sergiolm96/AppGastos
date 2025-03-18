@@ -14,6 +14,7 @@ export interface Expense {
  * @returns La instancia de Chart o null si no se pudo crear
  */
 export function createExpenseChart(canvas: HTMLCanvasElement, expenses: Expense[]): Chart | null {
+  console.log("Creando gráfico con datos:", expenses); // Depurar
   if (!canvas || !expenses || expenses.length === 0) {
     return null;
   }
@@ -27,6 +28,9 @@ export function createExpenseChart(canvas: HTMLCanvasElement, expenses: Expense[
 
   const labels = expenses.map(expense => expense.fecha);
   const data = expenses.map(expense => expense.cantidad);
+
+  console.log("Etiquetas:", labels);
+  console.log("Valores:", data);
 
   return new Chart(ctx, {
     type: 'bar',

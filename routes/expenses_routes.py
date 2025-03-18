@@ -3,6 +3,7 @@ from models.expense import Gasto
 from config import db  
 from datetime import datetime
 from flask_login import login_required, current_user
+import json
 
 
 expense_bp = Blueprint("expenses", __name__)
@@ -63,5 +64,6 @@ def see_expenses():
         }
         for gasto in gastos
     ]
+    print("Gastos serializados:", json.dumps(gastos_serializados, indent=4))
 
     return render_template('see_expenses.html', gastos=gastos_serializados)

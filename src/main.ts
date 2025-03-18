@@ -11,7 +11,9 @@ function initExpenseCharts(): void {
     try {
       // Obtenemos los datos del atributo y los parseamos
       const gastosDataString = expenseCanvas.getAttribute('data-gastos') || '[]';
+      console.log("Datos de gastos (string):", gastosDataString); // Depurar
       const gastosData = JSON.parse(gastosDataString) as Expense[];
+      console.log("Datos de gastos (JSON):", gastosData); // Depurar
       
       // Creamos el gráfico
       const chart = createExpenseChart(expenseCanvas, gastosData);

@@ -2,13 +2,14 @@
   "name": "gastos-app",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch"
+    "build": "vite build",
+    "dev": "vite"
   },
   "dependencies": {
     "chart.js": "^4.4.1"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^6.2.2"
   }
 }
