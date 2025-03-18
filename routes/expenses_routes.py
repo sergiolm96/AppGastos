@@ -12,15 +12,16 @@ expense_bp = Blueprint("expenses", __name__)
 @login_required
 def add_expense():
     if request.method == "GET":
-        return render_template("new_expense.html")
+        from config import EXPENSE_CATEGORIES
+        return render_template("new_expense.html", categories=EXPENSE_CATEGORIES)
     
     if request.method == "POST":
         
-        categoria_id = request.form.get('categoria_id')
+        categoria = request.form.get('categoria')
         cantidad = request.form.get('cantidad')
         concepto = request.form.get('concepto')
   
-        if not categoria_id or not cantidad:
+        if not categoria or not cantidad:
             flash("Todos los campos son requeridos", "danger")
             return redirect(url_for('nuevo_gasto'))
 
@@ -28,7 +29,7 @@ def add_expense():
             fecha=datetime.now().strftime('%d-%m-%Y'),
             concepto=concepto,
             cantidad=float(cantidad),
-            categoria_id=categoria_id,
+            categoria=categoria,
             usuario_id=current_user.id
         )
         
@@ -64,6 +65,5 @@ def see_expenses():
         }
         for gasto in gastos
     ]
-    print("Gastos serializados:", json.dumps(gastos_serializados, indent=4))
-
+    
     return render_template('see_expenses.html', gastos=gastos_serializados)

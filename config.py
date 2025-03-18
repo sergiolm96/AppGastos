@@ -16,3 +16,15 @@ class Config:
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
+
+# Categorias de gastos
+EXPENSE_CATEGORIES = [
+    {"id": "1", "name": "Comida"},
+    {"id": "2", "name": "Limpieza"},
+    {"id": "3", "name": "Coche"},
+    {"id": "4", "name": "Ocio"},
+    {"id": "5", "name": "Salud"},
+    {"id": "6", "name": "Educación"},
+    {"id": "7", "name": "Gatos"},
+    {"id": "8", "name": "Otros"}
+]
