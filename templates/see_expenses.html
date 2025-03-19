@@ -2,6 +2,29 @@
 {% block content %}
 <h1>Tus Gastos</h1>
 
+<div class="filter-controls">
+    <div class="date-filters">
+        <label for="fecha-inicio">Desde:</label>
+        <input type="date" id="fecha-inicio" name="fecha-inicio">
+        
+        <label for="fecha-fin">Hasta:</label>
+        <input type="date" id="fecha-fin" name="fecha-fin">
+    </div>
+    
+    <div class="category-filter">
+        <label for="categoria-filtro">Categoría:</label>
+        <select id="categoria-filtro">
+            <option value="todas">Todas</option>
+            {% for categoria in categorias %}
+            <option value="{{ categoria }}">{{ categoria }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button id="aplicar-filtros" class="btn btn-primary">Aplicar Filtros</button>
+    <button id="resetear-filtros" class="btn btn-secondary">Resetear</button>
+</div>
+
 <div class="chart-container">
     {% if gastos %}
         <!-- Usamos data-attribute para pasar los datos a TypeScript -->     
@@ -19,14 +42,16 @@
                     <th>Fecha</th>
                     <th>Concepto</th>
                     <th>Cantidad</th>
+                    <th>Categoria</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="gastos-tabla">
                 {% for gasto in gastos %}
                 <tr>
                     <td>{{ gasto.fecha }}</td>
                     <td>{{ gasto.descripcion }}</td>
                     <td>{{ gasto.cantidad }}</td>
+                    <td>{{ gasto.categoria }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -13,6 +13,7 @@ expense_bp = Blueprint("expenses", __name__)
 def add_expense():
     if request.method == "GET":
         from config import EXPENSE_CATEGORIES
+        today = datetime.now().strftime('%Y-%m-%d')
         return render_template("new_expense.html", categories=EXPENSE_CATEGORIES)
     
     if request.method == "POST":
@@ -20,13 +21,24 @@ def add_expense():
         categoria = request.form.get('categoria')
         cantidad = request.form.get('cantidad')
         concepto = request.form.get('concepto')
+        fecha_str = request.form.get('fecha')
   
-        if not categoria or not cantidad:
+        if not categoria or not cantidad or not concepto:
             flash("Todos los campos son requeridos", "danger")
             return redirect(url_for('nuevo_gasto'))
+        
+        if fecha_str:
+            try:
+                fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%d')
+                fecha_formateada = fecha_obj.strftime('%d-%m-%Y')
+            except ValueError:
+                fecha_formateada = datetime.now().strftime('%d-%m-%Y')
+        else:
+            fecha_formateada = datetime.now().strftime('%d-%m-%Y')
+
 
         nuevo_gasto = Gasto(
-            fecha=datetime.now().strftime('%d-%m-%Y'),
+            fecha=fecha_formateada,
             concepto=concepto,
             cantidad=float(cantidad),
             categoria=categoria,
@@ -42,7 +54,6 @@ def add_expense():
 @expense_bp.route('/gastos', methods=['GET'])
 @login_required
 def see_expenses():
-    
     inicio = request.args.get('inicio', None)
     fin = request.args.get('fin', None)
 
@@ -61,9 +72,13 @@ def see_expenses():
         {
             'fecha': gasto.fecha,
             'descripcion': gasto.concepto,
-            'cantidad': float(gasto.cantidad)
+            'cantidad': float(gasto.cantidad),
+            'categoria': gasto.categoria
         }
         for gasto in gastos
     ]
+    print(gastos_serializados)
+    categorias_gasto = set([gasto['categoria'] for gasto in gastos_serializados])
+    print(categorias_gasto)
     
-    return render_template('see_expenses.html', gastos=gastos_serializados)
+    return render_template('see_expenses.html', gastos=gastos_serializados, categorias=categorias_gasto)
