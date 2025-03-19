@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplicación de Gastos</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fuentes modernas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Eliminamos Bootstrap para usar nuestros propios estilos -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="flash-messages">
+            <div class="flash-messages container">
                 {% for category, message in messages %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                     {{ message }}
@@ -24,30 +28,39 @@
         {% endif %}
     {% endwith %}
     <header>
-        <nav>
-            <ul>
-                {% if current_user.is_authenticated %}
-                    <!-- Si el usuario está logeado -->
-                    <li><a href="{{ url_for('index') }}">Inicio</a></li>
-                    <li><a href="{{ url_for('auth.logout') }}">Cerrar sesión</a></li>
-                    <li><a href="{{ url_for('expenses.see_expenses') }}">Ver mis gastos</a></li>
-                    <li><a href="{{ url_for('expenses.add_expense') }}">Añadir gastos</a></li>
-                {% else %}
-                    <!-- Si el usuario no está logeado -->
-                    <li><a href="{{ url_for('auth.login') }}">Iniciar sesión</a></li>
-                    <li><a href="{{ url_for('auth.register_user') }}">Registrarse</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-        
+        <div class="container">
+            <nav class="main-nav">
+                <div class="logo">
+                    <a href="{{ url_for('index') }}">Control de Gastos</a>
+                </div>
+                <ul class="nav-links">
+                    {% if current_user.is_authenticated %}
+                        <!-- Si el usuario está logeado -->
+                        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                        <li><a href="{{ url_for('expenses.see_expenses') }}">Ver mis gastos</a></li>
+                        <li><a href="{{ url_for('expenses.add_expense') }}">Añadir gastos</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" class="nav-logout">Cerrar sesión</a></li>
+                    {% else %}
+                        <!-- Si el usuario no está logeado -->
+                        <li><a href="{{ url_for('auth.login') }}">Iniciar sesión</a></li>
+                        <li><a href="{{ url_for('auth.register_user') }}" class="nav-signup">Registrarse</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
     </header>
     
-    <main>
+    <main class="container">
         {% block content %}{% endblock %}
     </main>
     
     <footer>
-        <p>&copy; 2025 Aplicación de Gastos</p>
+        <div class="container">
+            <p>&copy; 2025 Aplicación de Gastos</p>
+        </div>
     </footer>
+
+    <!-- Scripts necesarios -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

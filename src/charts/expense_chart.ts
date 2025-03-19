@@ -145,7 +145,6 @@ export function createExpenseChart(canvas: HTMLCanvasElement, expenses: Expense[
           }
         }
       },
-      cutout: '60%'
     }
   });
 }

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Tus Gastos</h1>
+<div class="page-header">
+    <h1>Tus Gastos</h1>
+    <p class="subtitle">Visualiza y analiza tus gastos de manera simple</p>
+</div>
 
 <div class="filter-controls">
     <div class="date-filters">
@@ -21,20 +24,82 @@
         </select>
     </div>
     
-    <button id="aplicar-filtros" class="btn btn-primary">Aplicar Filtros</button>
-    <button id="resetear-filtros" class="btn btn-secondary">Resetear</button>
+    <div class="filter-actions">
+        <button id="aplicar-filtros" class="btn btn-primary">Aplicar Filtros</button>
+        <button id="resetear-filtros" class="btn btn-secondary">Resetear</button>
+    </div>
 </div>
 
-<div class="chart-container">
-    {% if gastos %}
-        <!-- Usamos data-attribute para pasar los datos a TypeScript -->     
-        <canvas id="grafico-gastos" data-gastos="{{ gastos | tojson | safe | replace('\"', '"') }}"></canvas>
-    {% else %}
-        <p>No hay gastos registrados para mostrar.</p>
-    {% endif %}
+<div class="dashboard-grid">
+    <div class="chart-container">
+        <h3>Distribución de Gastos</h3>
+        {% if gastos %}
+            <!-- Usamos data-attribute para pasar los datos a TypeScript -->     
+            <canvas id="grafico-gastos" data-gastos="{{ gastos | tojson | safe | replace('\"', '"') }}"></canvas>
+            
+            <div class="chart-legend">
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-1"></span>
+                    <span>Comida</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-2"></span>
+                    <span>Limpieza</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-3"></span>
+                    <span>Coche</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-4"></span>
+                    <span>Ocio</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-5"></span>
+                    <span>Salud</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-6"></span>
+                    <span>Educación</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-7"></span>
+                    <span>Gatos</span>
+                </div>
+                <div class="chart-legend-item">
+                    <span class="chart-legend-color category-8"></span>
+                    <span>Otros</span>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No hay gastos registrados para mostrar.</p>
+                <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">Añadir gasto</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="expenses-summary">
+        <h3>Resumen de Gastos</h3>
+        <div class="summary-cards">
+            <div class="summary-card total">
+                <div class="summary-title">Total</div>
+                <div class="summary-value" id="total-gastos">€0.00</div>
+            </div>
+            <div class="summary-card average">
+                <div class="summary-title">Promedio</div>
+                <div class="summary-value" id="promedio-gastos">€0.00</div>
+            </div>
+            <div class="summary-card top-category">
+                <div class="summary-title">Categoría Principal</div>
+                <div class="summary-value" id="categoria-principal">-</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="expenses-list">
+    <h3>Detalle de Gastos</h3>
     {% if gastos %}
         <table>
             <thead>
@@ -42,25 +107,20 @@
                     <th>Fecha</th>
                     <th>Concepto</th>
                     <th>Cantidad</th>
-                    <th>Categoria</th>
+                    <th>Categoría</th>
                 </tr>
             </thead>
             <tbody id="gastos-tabla">
-                {% for gasto in gastos %}
-                <tr>
-                    <td>{{ gasto.fecha }}</td>
-                    <td>{{ gasto.descripcion }}</td>
-                    <td>{{ gasto.cantidad }}</td>
-                    <td>{{ gasto.categoria }}</td>
-                </tr>
-                {% endfor %}
+                <!-- La tabla se generará dinámicamente con JavaScript -->
             </tbody>
         </table>
+    {% else %}
+        <div class="empty-state">
+            <p>No hay gastos registrados para mostrar.</p>
+        </div>
     {% endif %}
 </div>
 
-<!-- Incluir Chart.js antes de tu script -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Incluir el script compilado de TypeScript -->
 <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}
