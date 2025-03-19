@@ -6,6 +6,7 @@ export interface Expense {
   cantidad: number;
   descripcion?: string;
   categoria: string;
+  categoria_id?: string;
 }
 
 // Interfaz para opciones de filtro
@@ -62,7 +63,24 @@ function parseDate(dateStr: string): Date {
 }
 
 /**
- * Crea un gráfico de barras para visualizar gastos
+ * Obtiene los colores de las categorías desde window.categoryColors o usa colores por defecto
+ * @returns Array de colores para cada categoría
+ */
+function getCategoryColors(): string[] {
+  return (window as any).categoryColors || [
+    '#4cc9f0', // Comida
+    '#4361ee', // Limpieza
+    '#3a0ca3', // Coche
+    '#7209b7', // Ocio
+    '#f72585', // Salud
+    '#4caf50', // Educación
+    '#ff9800', // Gatos
+    '#f44336'  // Otros
+  ];
+}
+
+/**
+ * Crea un gráfico de donut para visualizar gastos por categoría
  * @param canvas - El elemento canvas donde dibujar el gráfico
  * @param expenses - Array de datos de gastos
  * @returns La instancia de Chart o null si no se pudo crear
@@ -79,54 +97,130 @@ export function createExpenseChart(canvas: HTMLCanvasElement, expenses: Expense[
     return null;
   }
 
-  // Agrupar gastos por fecha
-  const gastosPorFecha: Record<string, number> = {};
-  expenses.forEach(expense => {
-    if (gastosPorFecha[expense.fecha]) {
-      gastosPorFecha[expense.fecha] += expense.cantidad;
-    } else {
-      gastosPorFecha[expense.fecha] = expense.cantidad;
-    }
+  // Agrupar gastos por categoría
+  const categorias = [...new Set(expenses.map(expense => expense.categoria))];
+  const gastosPorCategoria = categorias.map(categoria => {
+    const gastosCategoria = expenses.filter(expense => expense.categoria === categoria);
+    return gastosCategoria.reduce((sum, expense) => sum + expense.cantidad, 0);
   });
 
-  const labels = Object.keys(gastosPorFecha);
-  const data = Object.values(gastosPorFecha);
+  // Obtener colores para cada categoría
+  const categoryColors = getCategoryColors();
+  
+  const colores = categorias.map(categoria => {
+    const expense = expenses.find(exp => exp.categoria === categoria);
+    if (expense && expense.categoria_id) {
+      const categoryIndex = parseInt(expense.categoria_id) - 1;
+      return categoryColors[categoryIndex] || categoryColors[7]; // Usar "Otros" si no hay color específico
+    }
+    return categoryColors[7]; // Color por defecto
+  });
 
   return new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: categorias,
       datasets: [{
-        label: 'Gastos por Fecha',
-        data: data,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-      }],
+        data: gastosPorCategoria,
+        backgroundColor: colores,
+        borderWidth: 1
+      }]
     },
     options: {
-      scales: {
-        y: {
-          beginAtZero: true
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          display: false // Ocultamos la leyenda default porque usamos nuestra propia leyenda
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: €${value} (${percentage}%)`;
+            }
+          }
         }
-      }
+      },
+      cutout: '60%'
     }
   });
 }
 
-// Función para actualizar un gráfico existente con nuevos datos
+/**
+ * Actualiza un gráfico existente con nuevos datos
+ * @param chart - Instancia del gráfico a actualizar
+ * @param expenses - Nuevos datos de gastos
+ */
 export function updateExpenseChart(chart: Chart, expenses: Expense[]): void {
-  // Agrupar gastos por fecha
-  const gastosPorFecha: Record<string, number> = {};
-  expenses.forEach(expense => {
-    if (gastosPorFecha[expense.fecha]) {
-      gastosPorFecha[expense.fecha] += expense.cantidad;
-    } else {
-      gastosPorFecha[expense.fecha] = expense.cantidad;
-    }
+  if (!expenses || expenses.length === 0) {
+    chart.data.labels = [];
+    chart.data.datasets[0].data = [];
+    chart.update();
+    return;
+  }
+
+  // Agrupar gastos por categoría
+  const categorias = [...new Set(expenses.map(expense => expense.categoria))];
+  const gastosPorCategoria = categorias.map(categoria => {
+    const gastosCategoria = expenses.filter(expense => expense.categoria === categoria);
+    return gastosCategoria.reduce((sum, expense) => sum + expense.cantidad, 0);
   });
 
-  chart.data.labels = Object.keys(gastosPorFecha);
-  chart.data.datasets[0].data = Object.values(gastosPorFecha);
+  // Obtener colores para cada categoría
+  const categoryColors = getCategoryColors();
+  
+  const colores = categorias.map(categoria => {
+    const expense = expenses.find(exp => exp.categoria === categoria);
+    if (expense && expense.categoria_id) {
+      const categoryIndex = parseInt(expense.categoria_id) - 1;
+      return categoryColors[categoryIndex] || categoryColors[7]; // Usar "Otros" si no hay color específico
+    }
+    return categoryColors[7]; // Color por defecto
+  });
+
+  chart.data.labels = categorias;
+  chart.data.datasets[0].data = gastosPorCategoria;
+  chart.data.datasets[0].backgroundColor = colores;
   chart.update();
+}
+
+/**
+ * Calcula y muestra el resumen de gastos
+ * @param expenses - Array de gastos
+ */
+export function updateExpenseSummary(expenses: Expense[]): void {
+  if (!expenses || expenses.length === 0) {
+    document.getElementById('total-gastos')!.textContent = '€0.00';
+    document.getElementById('promedio-gastos')!.textContent = '€0.00';
+    document.getElementById('categoria-principal')!.textContent = '-';
+    return;
+  }
+  
+  const total = expenses.reduce((sum, expense) => sum + expense.cantidad, 0);
+  const promedio = total / expenses.length;
+  
+  // Encontrar categoría principal
+  const categoriaCount: Record<string, number> = {};
+  expenses.forEach(expense => {
+    categoriaCount[expense.categoria] = (categoriaCount[expense.categoria] || 0) + expense.cantidad;
+  });
+  
+  let categoriaPrincipal = '';
+  let maxGasto = 0;
+  
+  for (const [categoria, cantidad] of Object.entries(categoriaCount)) {
+    if (cantidad > maxGasto) {
+      maxGasto = cantidad;
+      categoriaPrincipal = categoria;
+    }
+  }
+  
+  // Actualizar elementos del DOM
+  document.getElementById('total-gastos')!.textContent = `€${total.toFixed(2)}`;
+  document.getElementById('promedio-gastos')!.textContent = `€${promedio.toFixed(2)}`;
+  document.getElementById('categoria-principal')!.textContent = categoriaPrincipal;
 }

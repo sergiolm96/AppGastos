@@ -54,10 +54,13 @@ def add_expense():
 @expense_bp.route('/gastos', methods=['GET'])
 @login_required
 def see_expenses():
+    from config import EXPENSE_CATEGORIES
     inicio = request.args.get('inicio', None)
     fin = request.args.get('fin', None)
 
     query = Gasto.query.filter_by(usuario_email=current_user.email)
+
+    categoria_id = {cat['name']: cat['id'] for cat in EXPENSE_CATEGORIES}
 
     if inicio:
         inicio = datetime.strptime(inicio, '%Y-%m-%d')
@@ -73,12 +76,12 @@ def see_expenses():
             'fecha': gasto.fecha,
             'descripcion': gasto.concepto,
             'cantidad': float(gasto.cantidad),
-            'categoria': gasto.categoria
+            'categoria': gasto.categoria,
+            'categoria_id': categoria_id.get(gasto.categoria, '8')
         }
         for gasto in gastos
     ]
-    print(gastos_serializados)
+    
     categorias_gasto = set([gasto['categoria'] for gasto in gastos_serializados])
-    print(categorias_gasto)
     
     return render_template('see_expenses.html', gastos=gastos_serializados, categorias=categorias_gasto)

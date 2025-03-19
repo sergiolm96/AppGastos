@@ -1,4 +1,4 @@
-import { createExpenseChart, updateExpenseChart, Expense, FilterOptions, filterExpenses } from './charts/expense_chart';
+import { createExpenseChart, updateExpenseChart, updateExpenseSummary, Expense, FilterOptions, filterExpenses } from './charts/expense_chart';
 import { Chart } from 'chart.js';
 
 let allExpenses: Expense[] = [];
@@ -24,6 +24,9 @@ function initExpenseCharts(): void {
       
       if (!currentChart) {
         console.warn('No se pudo crear el gráfico de gastos');
+      } else {
+        // Actualizamos el resumen de gastos
+        updateExpenseSummary(allExpenses);
       }
     } catch (error) {
       console.error('Error al inicializar el gráfico de gastos:', error);
@@ -53,6 +56,9 @@ function applyFilters(): void {
     updateExpenseChart(currentChart, filteredExpenses);
   }
   
+  // Actualizar el resumen
+  updateExpenseSummary(filteredExpenses);
+  
   // Actualizar la tabla
   updateExpenseTable(filteredExpenses);
 }
@@ -64,36 +70,56 @@ function updateExpenseTable(expenses: Expense[]): void {
   const tbody = document.getElementById('gastos-tabla');
   if (!tbody) return;
   
-  // Obtener todas las filas
-  const rows = tbody.querySelectorAll('tr');
+  // Limpiar la tabla actual
+  tbody.innerHTML = '';
   
-  // Si no hay gastos filtrados, ocultar todas las filas
+  // Si no hay gastos filtrados, mostrar mensaje
   if (expenses.length === 0) {
-    rows.forEach(row => row.style.display = 'none');
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 4;
+    td.textContent = 'No hay gastos que coincidan con los filtros seleccionados.';
+    td.className = 'empty-message';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
     return;
   }
   
-  // Crear un mapa para búsqueda rápida
-  const expenseMap = new Map();
+  // Crear nuevas filas para cada gasto
   expenses.forEach(expense => {
-    const key = `${expense.fecha}-${expense.categoria}-${expense.descripcion}-${expense.cantidad}`;
-    expenseMap.set(key, true);
-  });
-  
-  // Mostrar u ocultar filas según corresponda
-  rows.forEach(row => {
-    const fecha = row.getAttribute('data-fecha');
-    const categoria = row.getAttribute('data-categoria');
-    const descripcion = row.querySelector('td:nth-child(2)')?.textContent || '';
-    const cantidad = parseFloat(row.querySelector('td:nth-child(3)')?.textContent || '0');
+    const tr = document.createElement('tr');
     
-    const key = `${fecha}-${categoria}-${descripcion}-${cantidad}`;
-    
-    if (expenseMap.has(key)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
+    // Añadimos la clase de categoría para estilos
+    if (expense.categoria_id) {
+      tr.className = `category-row-${expense.categoria_id}`;
     }
+    
+    const tdFecha = document.createElement('td');
+    tdFecha.textContent = expense.fecha;
+    
+    const tdDescripcion = document.createElement('td');
+    tdDescripcion.textContent = expense.descripcion || '';
+    
+    const tdCantidad = document.createElement('td');
+    tdCantidad.className = 'amount';
+    tdCantidad.textContent = `€${expense.cantidad}`;
+    
+    const tdCategoria = document.createElement('td');
+    const spanCategoria = document.createElement('span');
+    if (expense.categoria_id) {
+      spanCategoria.className = `category-badge category-${expense.categoria_id}`;
+    } else {
+      spanCategoria.className = 'category-badge';
+    }
+    spanCategoria.textContent = expense.categoria;
+    tdCategoria.appendChild(spanCategoria);
+    
+    tr.appendChild(tdFecha);
+    tr.appendChild(tdDescripcion);
+    tr.appendChild(tdCantidad);
+    tr.appendChild(tdCategoria);
+    
+    tbody.appendChild(tr);
   });
 }
 
@@ -110,11 +136,40 @@ function resetFilters(): void {
     updateExpenseChart(currentChart, allExpenses);
   }
   
-  // Mostrar todas las filas de la tabla
-  const tbody = document.getElementById('gastos-tabla');
-  if (tbody) {
-    const rows = tbody.querySelectorAll('tr');
-    rows.forEach(row => row.style.display = '');
+  // Actualizar el resumen
+  updateExpenseSummary(allExpenses);
+  
+  // Actualizar la tabla con todos los gastos
+  updateExpenseTable(allExpenses);
+}
+
+/**
+ * Configura los colores de categorías basados en las variables CSS
+ */
+function setupCategoryColors(): void {
+  // Verificamos si ya existen los colores en window
+  if (!(window as any).categoryColors) {
+    try {
+      const getCategoryColor = (categoryId: number) => {
+        const root = getComputedStyle(document.documentElement);
+        return root.getPropertyValue(`--category-${categoryId}`).trim();
+      };
+
+      // Colores para cada categoría
+      (window as any).categoryColors = [
+        getCategoryColor(1), // Comida
+        getCategoryColor(2), // Limpieza
+        getCategoryColor(3), // Coche
+        getCategoryColor(4), // Ocio
+        getCategoryColor(5), // Salud
+        getCategoryColor(6), // Educación
+        getCategoryColor(7), // Gatos
+        getCategoryColor(8)  // Otros
+      ];
+    } catch (error) {
+      console.warn('No se pudieron obtener los colores de las variables CSS:', error);
+      // Usaremos los colores por defecto definidos en expense_chart.ts
+    }
   }
 }
 
@@ -123,6 +178,9 @@ function resetFilters(): void {
  */
 function initApp(): void {
   console.log('Inicializando aplicación...');
+  
+  // Configuramos los colores de las categorías
+  setupCategoryColors();
   
   // Inicializamos los gráficos de gastos
   initExpenseCharts();
