@@ -87,39 +87,17 @@
                 <div class="summary-value" id="total-gastos">€0.00</div>
             </div>
             <div class="summary-card average">
-                <div class="summary-title">Promedio</div>
+                <div class="summary-title">Gasto medio</div>
                 <div class="summary-value" id="promedio-gastos">€0.00</div>
             </div>
             <div class="summary-card top-category">
-                <div class="summary-title">Categoría Principal</div>
+                <div class="summary-title">Mayores gastos</div>
                 <div class="summary-value" id="categoria-principal">-</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="expenses-list">
-    <h3>Detalle de Gastos</h3>
-    {% if gastos %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Concepto</th>
-                    <th>Cantidad</th>
-                    <th>Categoría</th>
-                </tr>
-            </thead>
-            <tbody id="gastos-tabla">
-                <!-- La tabla se generará dinámicamente con JavaScript -->
-            </tbody>
-        </table>
-    {% else %}
-        <div class="empty-state">
-            <p>No hay gastos registrados para mostrar.</p>
-        </div>
-    {% endif %}
-</div>
 
 <!-- Incluir el script compilado de TypeScript -->
 <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>

@@ -80,7 +80,7 @@ function getCategoryColors(): string[] {
 }
 
 /**
- * Crea un gráfico de donut para visualizar gastos por categoría
+ * Crea un gráfico para visualizar gastos por categoría
  * @param canvas - El elemento canvas donde dibujar el gráfico
  * @param expenses - Array de datos de gastos
  * @returns La instancia de Chart o null si no se pudo crear
@@ -97,54 +97,90 @@ export function createExpenseChart(canvas: HTMLCanvasElement, expenses: Expense[
     return null;
   }
 
-  // Agrupar gastos por categoría
+  // Convertir y ordenar fechas cronológicamente (de más antigua a más reciente)
+  const fechasOrdenadas = [...new Set(expenses.map(expense => expense.fecha))]
+    .sort((a, b) => {
+      return parseDate(a).getTime() - parseDate(b).getTime();
+    });
+  
+  // Obtener categorías únicas
   const categorias = [...new Set(expenses.map(expense => expense.categoria))];
-  const gastosPorCategoria = categorias.map(categoria => {
-    const gastosCategoria = expenses.filter(expense => expense.categoria === categoria);
-    return gastosCategoria.reduce((sum, expense) => sum + expense.cantidad, 0);
-  });
-
+  
   // Obtener colores para cada categoría
   const categoryColors = getCategoryColors();
   
-  const colores = categorias.map(categoria => {
+  // Crear datasets para cada categoría
+  const datasets = categorias.map((categoria) => {
+    // Encontrar un gasto de esta categoría para obtener su ID
     const expense = expenses.find(exp => exp.categoria === categoria);
+    let colorIndex = 7; // "Otros" por defecto
+    
     if (expense && expense.categoria_id) {
-      const categoryIndex = parseInt(expense.categoria_id) - 1;
-      return categoryColors[categoryIndex] || categoryColors[7]; // Usar "Otros" si no hay color específico
+      colorIndex = parseInt(expense.categoria_id) - 1;
     }
-    return categoryColors[7]; // Color por defecto
+    
+    // Datos de esta categoría para cada fecha
+    const data = fechasOrdenadas.map(fecha => {
+      const gastosEnFechaYCategoria = expenses.filter(
+        expense => expense.fecha === fecha && expense.categoria === categoria
+      );
+      return gastosEnFechaYCategoria.reduce((sum, expense) => sum + expense.cantidad, 0);
+    });
+    
+    return {
+      label: categoria,
+      data: data,
+      backgroundColor: categoryColors[colorIndex] || categoryColors[7],
+      borderWidth: 1
+    };
   });
 
   return new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: categorias,
-      datasets: [{
-        data: gastosPorCategoria,
-        backgroundColor: colores,
-        borderWidth: 1
-      }]
+      labels: fechasOrdenadas,
+      datasets: datasets
     },
     options: {
       responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+          title: {
+            display: true,
+            text: 'Fecha'
+          }
+        },
+        y: {
+          stacked: true,
+          title: {
+            display: true,
+            text: 'Cantidad (€)'
+          }
+        }
+      },
       plugins: {
         legend: {
           position: 'bottom',
-          display: false // Ocultamos la leyenda default porque usamos nuestra propia leyenda
+          display: true // Mostramos la leyenda para identificar categorías
         },
         tooltip: {
           callbacks: {
             label: function(context: any) {
-              const label = context.label || '';
+              const label = context.dataset.label || '';
               const value = context.raw || 0;
-              const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-              const percentage = Math.round((value / total) * 100);
-              return `${label}: €${value} (${percentage}%)`;
+              return `${label}: €${value.toFixed(2)}`;
+            },
+            footer: function(tooltipItems: any) {
+              let sum = 0;
+              tooltipItems.forEach((tooltipItem: any) => {
+                sum += tooltipItem.parsed.y;
+              });
+              return `Total: €${sum.toFixed(2)}`;
             }
           }
         }
-      },
+      }
     }
   });
 }
@@ -157,33 +193,51 @@ export function createExpenseChart(canvas: HTMLCanvasElement, expenses: Expense[
 export function updateExpenseChart(chart: Chart, expenses: Expense[]): void {
   if (!expenses || expenses.length === 0) {
     chart.data.labels = [];
-    chart.data.datasets[0].data = [];
+    chart.data.datasets = [];
     chart.update();
     return;
   }
 
-  // Agrupar gastos por categoría
+  // Convertir y ordenar fechas cronológicamente (de más antigua a más reciente)
+  const fechasOrdenadas = [...new Set(expenses.map(expense => expense.fecha))]
+    .sort((a, b) => {
+      return parseDate(a).getTime() - parseDate(b).getTime();
+    });
+  
+  // Obtener categorías únicas
   const categorias = [...new Set(expenses.map(expense => expense.categoria))];
-  const gastosPorCategoria = categorias.map(categoria => {
-    const gastosCategoria = expenses.filter(expense => expense.categoria === categoria);
-    return gastosCategoria.reduce((sum, expense) => sum + expense.cantidad, 0);
-  });
-
+  
   // Obtener colores para cada categoría
   const categoryColors = getCategoryColors();
   
-  const colores = categorias.map(categoria => {
+  // Crear datasets para cada categoría
+  const datasets = categorias.map((categoria) => {
+    // Encontrar un gasto de esta categoría para obtener su ID
     const expense = expenses.find(exp => exp.categoria === categoria);
+    let colorIndex = 7; // "Otros" por defecto
+    
     if (expense && expense.categoria_id) {
-      const categoryIndex = parseInt(expense.categoria_id) - 1;
-      return categoryColors[categoryIndex] || categoryColors[7]; // Usar "Otros" si no hay color específico
+      colorIndex = parseInt(expense.categoria_id) - 1;
     }
-    return categoryColors[7]; // Color por defecto
+    
+    // Datos de esta categoría para cada fecha
+    const data = fechasOrdenadas.map(fecha => {
+      const gastosEnFechaYCategoria = expenses.filter(
+        expense => expense.fecha === fecha && expense.categoria === categoria
+      );
+      return gastosEnFechaYCategoria.reduce((sum, expense) => sum + expense.cantidad, 0);
+    });
+    
+    return {
+      label: categoria,
+      data: data,
+      backgroundColor: categoryColors[colorIndex] || categoryColors[7],
+      borderWidth: 1
+    };
   });
 
-  chart.data.labels = categorias;
-  chart.data.datasets[0].data = gastosPorCategoria;
-  chart.data.datasets[0].backgroundColor = colores;
+  chart.data.labels = fechasOrdenadas;
+  chart.data.datasets = datasets;
   chart.update();
 }
 
