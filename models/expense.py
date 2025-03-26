@@ -1,5 +1,5 @@
 from datetime import datetime
-from database import db  
+from config import db  
 class Gasto(db.Model):
     __tablename__ = 'gastos'
     
